@@ -5,93 +5,165 @@ import java.util.StringTokenizer;
 %}
 
 /* YACC Declarations */
+%type <int> Ident
 %token Ident 1 IntConst 2 RealConst 3 Boolean 4 If 11 Then 12 End 13 Elsif 14
 %token Assert 15 Put 16 Or 17 And 18 Else 19 Assign 21 LParen 22 RParen 23 Plus 24
 %token Minus 25 Star 26 Slash 27 Eq 28 Ne 29 Lt 30 Le 31 Gt 32 Ge 33
 %token Not 34 Bind 35 To 36 Begin 38 Loop 39 Exit 40 When 41 Record 42
-%token Var 43 NoType 44 Integer 45 Div 48 Mod 49 Semi 60
-%token Colon 61 Dot 62 Comma 63 Real 64
+%token Var 43 NoType 44 integer 45 Div 48 Mod 49 Semi 60
+%token Colon 61 Dot 62 Comma 63 Real 64 start 100
 
+%type <obj> pStateDeclSeq idlist type field_list state_decls declaration statement
+%type <obj> ref end_if expr and_expr not_expr rel_expr sum prod factor basic
 %start program
 /* Grammar follows */
 %%
 program : pStateDeclSeq
+		{root = new Tree(-1, null, $1, null, null);}
     ;
 pStateDeclSeq : /* empty string */
+		{$$ = null;}
     | statement Semi pStateDeclSeq
+		{$$ = new Tree(-1, null, $1, null, null); ((Tree)$$).addNext($3);}
     | Var idlist Colon type Semi pStateDeclSeq
+		{$$ = new Tree(Var, null, $2, $4, null); ((Tree)$$).addNext($6);}
     ;
 idlist : Ident 
+		{$$ = new Tree(Ident, null, null, null, null);}
    | Ident Comma idlist
+		{$$ = new Tree(Ident, null, null, null, null); ((Tree)$$).addNext($3);}
     ;
-type : Integer
+type : integer
+		{$$ = new Tree(integer, null, null, null, null);}
     | RealConst 
+		{$$ = new Tree(RealConst, null, null, null, null);}
     | Real
+		{$$ = new Tree(Real, null, null, null, null);}
     | Boolean
+		{$$ = new Tree(Boolean, null, null, null, null);}
     | Record field_list End Record
+		{$$ = new Tree(Record, null, $2, null, null);}
     ;
 field_list : idlist Colon type
+		{$$ = new Tree(-1, "field list", $1, $3, null);}
     | idlist Colon type Semi field_list
+		{$$ = new Tree(-1, "field list", $1, $3, null); ((Tree)$$).addNext($5);}
     ;
 state_decls : /* empty string */
+		{$$ = null;}
     | statement Semi pStateDeclSeq
+		{$$ = new Tree(-1, null, $1, null, null); ((Tree)$$).addNext($3);}
     | declaration Semi pStateDeclSeq
+		{$$ = new Tree(-1, null, $1, null, null); ((Tree)$$).addNext($3);}
     ;
 declaration : Var idlist Colon type
+		{$$ = new Tree(Var, null, $2, $4, null);}
     | Bind idlist To ref
+		{$$ = new Tree(Bind, null, $2, $4, null);} 
     | Bind Var idlist To ref
+		{$$ = new Tree(Bind, null, $3, $5, null);} 
     ;
 statement : ref Eq expr
+		{$$ = new Tree(Eq, null, $1, $3, null);}
     | Assert expr
+		{$$ = new Tree (Assert, null, $2, null, null);}
     | Begin state_decls End
+		{$$ = new Tree(Begin, null, $2, null, null);}
     | Loop state_decls End Loop
-    | Exit | Exit When expr
+		{$$ = new Tree(Loop, null, $2, null, null);
+		((Tree)$$).addNext(new Tree(End, null, null, null, null));}
+    | Exit
+		{$$ = null;} 
+    | Exit When expr
+		{$$ = new Tree(Exit, " When", $3, null, null);}
     | If expr Then state_decls end_if
+		{$$ = new Tree(If, null, $2, null, null); 
+		((Tree)$$).addNext(new Tree(Then, null, $4, null, null));}
     ;
 ref : Ident 
+		{$$ = new Tree(Ident, null, null, null, null);}
     | Ident Dot Ident
+		{$$ = new Tree(Ident, " Dot", new Tree(Ident, null, null, null, null), null, null);} 
     ;
 end_if : End If
+		{$$ = new Tree(End, " If", null, null, null);}
     | Else state_decls End If
+		{$$ = new Tree(Else, null, $2, null, null); 
+		((Tree)$$).addNext(new Tree(End, " If", null, null, null));} 
     | Elsif expr Then state_decls end_if
+		{$$ = new Tree(Elsif, null, $2, new Tree(Then, null, $4, null, null), null);
+		((Tree)$$).addNext($5);}
     ;
-expr : expr Or and_expr  
+expr : expr Or and_expr 
+		{$$ = new Tree(Or, null, $1, $3, null);}
     | and_expr
+		{$$ = $1;}
     ;
 and_expr : and_expr And not_expr 
+		{$$ = new Tree(And, null, $1, $3, null);}
     | not_expr
+		{$$ = $1;}
     ;
 not_expr : Not not_expr 
+		{$$ = new Tree(Not, null, $2, null, null);}
     | rel_expr
+		{$$ = $1;}
     ;
 rel_expr : sum 
+		{$$ = $1;}
     | rel_expr Assign sum 
+		{$$ = new Tree(Assign, null, $1, $3, null);}
     | rel_expr Ne sum
+		{$$ = new Tree(Ne, null, $1, $3, null);}
     | rel_expr Lt sum 
+		{$$ = new Tree(Lt, null, $1, $3, null);}
     | rel_expr Le sum
+		{$$ = new Tree(Le, null, $1, $3, null);}
     | rel_expr Gt sum 
+		{$$ = new Tree(Gt, null, $1, $3, null);}
     | rel_expr Ge sum
+		{$$ = new Tree(Ge, null, $1, $3, null);}
     ;
-sum : prod 
+sum : prod
+		{$$ = $1;} 
     | sum Plus prod 
+		{$$ = new Tree(Plus, null, $1, $3, null);}
     | sum Minus prod
+		{$$ = new Tree(Minus, null, $1, $3, null);}
     ;
 prod : factor 
+		{$$ = $1;}
     | prod Star factor 
+		{$$ = new Tree(Star, null, $1, $3, null);}
     | prod Slash factor
+		{$$ = new Tree(Slash, null, $1, $3, null);}
     | prod Div factor 
+		{$$ = new Tree(Div, null, $1, $3, null);}
     | prod Mod factor
+		{$$ = new Tree(Mod, null, $1, $3, null);}
     ;
-factor : Plus basic | Minus basic | basic
+factor : Plus basic 
+		{$$ = new Tree(Plus, null, $2, null, null);}
+    | Minus basic 
+		{$$ = new Tree(Minus, null, $2, null, null);}
+    | basic
+		{$$ = $1;}    
     ;
 basic : ref 
+		{$$ = $1;}    
     | LParen expr RParen 
-    | IntConst 
+		{$$ = new Tree(LParen, null, $2, null, null);
+		((Tree)$$).addNext(new Tree(RParen, null, null, null, null));} 
+    | IntConst
+		{$$ = new Tree(IntConst, null, null, null, null);} 
     | RealConst
+		{$$ = new Tree(RealConst, null, null, null, null);} 
+		
     ;
 %%
 PrintWriter outFile;
 public Yylex lexer;
+public Tree root;
 
 private int yylex ()
 {

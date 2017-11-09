@@ -7,6 +7,8 @@ import java.util.Scanner;
 %{
 private Parser parser;
 private PrintWriter outFile;
+private Tree root;
+
 public Yylex (java.io.Reader inFile, Parser parser)
 {
 	this (inFile);
@@ -31,7 +33,7 @@ D = [0-9]
 "then"		{return parser.Then;}
 "end"		{return parser.End;}
 "var" 	{return parser.Var;}
-"int"	{return parser.Integer;}
+"int"	{return parser.integer;}
 "real"	{return parser.Real;}
 "boolean"	{return parser.Boolean;}
 "record"	{return parser.Record;}
