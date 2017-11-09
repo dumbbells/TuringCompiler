@@ -25,6 +25,8 @@ class Tree{
 				System.out.print ("   ");
 			}
 				System.out.print(Parser.yyname[t.name]);
+				if (t.name == 1 || t.name == 2)
+					System.out.print(" " + turing.values.poll());
 				if (t.decor != null) 
 					System.out.print(t.decor);
 				System.out.println();

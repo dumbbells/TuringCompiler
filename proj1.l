@@ -53,9 +53,9 @@ D = [0-9]
 "not"	{return parser.Not;}
 "div"	{return parser.Div;}
 "mod"	{return parser.Mod;}
-{L}({L}|{D}|"_")*	{return parser.Ident;}
-{D}+"."+{D}+		{return parser.RealConst;}
-{D}+		{return parser.IntConst;}
+{L}({L}|{D}|"_")*	{turing.values.add(yytext()); return parser.Ident;}
+{D}+"."+{D}+		{turing.values.add(yytext()); return parser.RealConst;}
+{D}+		{turing.values.add(yytext()); return parser.IntConst;}
 ";"	{return parser.Semi;}
 ":"	{return parser.Colon;}
 "."	{return parser.Dot;}

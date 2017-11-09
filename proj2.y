@@ -24,7 +24,7 @@ program : pStateDeclSeq
 pStateDeclSeq : /* empty string */
 		{$$ = null;}
     | statement Semi pStateDeclSeq
-		{$$ = new Tree(-1, null, $1, null, null); ((Tree)$$).addNext($3);}
+		{$$ = $1; ((Tree)$$).addNext($3);}
     | Var idlist Colon type Semi pStateDeclSeq
 		{$$ = new Tree(Var, null, $2, $4, null); ((Tree)$$).addNext($6);}
     ;
@@ -52,9 +52,9 @@ field_list : idlist Colon type
 state_decls : /* empty string */
 		{$$ = null;}
     | statement Semi pStateDeclSeq
-		{$$ = new Tree(-1, null, $1, null, null); ((Tree)$$).addNext($3);}
+		{$$ = $1; ((Tree)$$).addNext($3);}
     | declaration Semi pStateDeclSeq
-		{$$ = new Tree(-1, null, $1, null, null); ((Tree)$$).addNext($3);}
+		{$$ = $1; ((Tree)$$).addNext($3);}
     ;
 declaration : Var idlist Colon type
 		{$$ = new Tree(Var, null, $2, $4, null);}
@@ -71,14 +71,13 @@ statement : ref Eq expr
 		{$$ = new Tree(Begin, null, $2, null, null);}
     | Loop state_decls End Loop
 		{$$ = new Tree(Loop, null, $2, null, null);
-		((Tree)$$).addNext(new Tree(End, null, null, null, null));}
+		((Tree)$$).addNext(new Tree(End, " Loop", null, null, null));}
     | Exit
-		{$$ = null;} 
+		{$$ = new Tree(Exit, null, null, null, null);} 
     | Exit When expr
 		{$$ = new Tree(Exit, " When", $3, null, null);}
     | If expr Then state_decls end_if
-		{$$ = new Tree(If, null, $2, null, null); 
-		((Tree)$$).addNext(new Tree(Then, null, $4, null, null));}
+		{$$ = new Tree(If, null, $2, $4, $5);} 
     ;
 ref : Ident 
 		{$$ = new Tree(Ident, null, null, null, null);}
@@ -91,7 +90,7 @@ end_if : End If
 		{$$ = new Tree(Else, null, $2, null, null); 
 		((Tree)$$).addNext(new Tree(End, " If", null, null, null));} 
     | Elsif expr Then state_decls end_if
-		{$$ = new Tree(Elsif, null, $2, new Tree(Then, null, $4, null, null), null);
+		{$$ = new Tree(Elsif, null, $2, $4, null);
 		((Tree)$$).addNext($5);}
     ;
 expr : expr Or and_expr 
