@@ -54,14 +54,14 @@ D = [0-9]
 "div"	{return parser.Div;}
 "mod"	{return parser.Mod;}
 {L}({L}|{D}|"_")*	{turing.values.add(yytext()); return parser.Ident;}
-{D}+"."+{D}+		{turing.values.add(yytext()); return parser.RealConst;}
+{D}+"."{D}+		{turing.values.add(yytext()); return parser.RealConst;}
 {D}+		{turing.values.add(yytext()); return parser.IntConst;}
 ";"	{return parser.Semi;}
 ":"	{return parser.Colon;}
 "."	{return parser.Dot;}
 ","	{return parser.Comma;}
-"="		{return parser.Assign;}
-":="	{return parser.Eq;}
+":="		{return parser.Assign;}
+"="	{return parser.Eq;}
 "not="	{return parser.Ne;}
 "<"	{return parser.Lt;}
 "<="	{return parser.Le;}

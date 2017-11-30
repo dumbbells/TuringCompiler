@@ -7,12 +7,13 @@ public class turing {
 	public static void main (String args[]) throws IOException
 	{
 		InputStreamReader f = new FileReader (args[0]);
-		Parser parser = new Parser (false);
+		Parser parser = new Parser (true);
 		Yylex lexer = new Yylex (f, parser);
 		parser.lexer = lexer;
 		System.out.println("Begin Parse");
 		parser.run();
-		Tree.printTree(parser.root, -1);
-		System.out.println("\nDone");
+		Tree.printTree(parser.root, 0);
+		System.out.println("\nDone\n");
+		ST.beginCheck(parser.root);
 	}
 }

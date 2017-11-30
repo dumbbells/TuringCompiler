@@ -2,7 +2,7 @@ JC = javac
 LEX = jflex
 YACC = byacc-j -J
 
-turing.class : turing.java Yylex.java Tree.class Parser.class
+turing : turing.java Yylex.java Tree.class Parser.class
 	$(JC) turing.java
 
 Yylex.java : proj1.l proj2.y Parser.java

@@ -19,14 +19,15 @@ import java.util.StringTokenizer;
 /* Grammar follows */
 %%
 program : pStateDeclSeq
-		{root = new Tree(-1, null, $1, null, null);}
+		{root = new Tree(-1, null, null, null, null);
+		root.addNext($1);}
     ;
 pStateDeclSeq : /* empty string */
 		{$$ = null;}
     | statement Semi pStateDeclSeq
 		{$$ = $1; ((Tree)$$).addNext($3);}
-    | Var idlist Colon type Semi pStateDeclSeq
-		{$$ = new Tree(Var, null, $2, $4, null); ((Tree)$$).addNext($6);}
+    | declaration Semi pStateDeclSeq
+		{$$ = $1; ((Tree) $$).addNext($3);}
     ;
 idlist : Ident 
 		{$$ = new Tree(Ident, null, null, null, null);}
@@ -34,20 +35,23 @@ idlist : Ident
 		{$$ = new Tree(Ident, null, null, null, null); ((Tree)$$).addNext($3);}
     ;
 type : integer
-		{$$ = new Tree(integer, null, null, null, null);}
+		{$$ = integer; }
     | RealConst 
-		{$$ = new Tree(RealConst, null, null, null, null);}
+		{$$ = RealConst;}
     | Real
-		{$$ = new Tree(Real, null, null, null, null);}
+		{$$ = Real;}
     | Boolean
-		{$$ = new Tree(Boolean, null, null, null, null);}
+		{$$ = Boolean;}
     | Record field_list End Record
 		{$$ = new Tree(Record, null, $2, null, null);}
     ;
 field_list : idlist Colon type
-		{$$ = new Tree(-1, "field list", $1, $3, null);}
+		{$$ = $1;
+		((Tree) $$).type = (Short)$3;}
     | idlist Colon type Semi field_list
-		{$$ = new Tree(-1, "field list", $1, $3, null); ((Tree)$$).addNext($5);}
+		{$$ = $1; ((Tree)$$).addNext($5);
+		((Tree) $$).type = (Short)$3;
+		}
     ;
 state_decls : /* empty string */
 		{$$ = null;}
@@ -57,14 +61,27 @@ state_decls : /* empty string */
 		{$$ = $1; ((Tree)$$).addNext($3);}
     ;
 declaration : Var idlist Colon type
-		{$$ = new Tree(Var, null, $2, $4, null);}
+		{
+			if ($4 instanceof Short){
+				$$ = new Tree(Var, null, $2, null, null); 
+				((Tree) $$).type = (Short) $4;
+			}
+			else {
+				$$ = new Tree(Var, null, $2, $4, null); 
+				((Tree) $$).type = Record;
+			}
+		}
     | Bind idlist To ref
-		{$$ = new Tree(Bind, null, $2, $4, null);} 
+		{
+		$$ = new Tree(Bind, null, $2, $4, null);
+		} 
     | Bind Var idlist To ref
-		{$$ = new Tree(Bind, null, $3, $5, null);} 
+		{
+		$$ = new Tree(Bind, " var", $3, $5, null);
+		} 
     ;
-statement : ref Eq expr
-		{$$ = new Tree(Eq, null, $1, $3, null);}
+statement : ref Assign expr
+		{$$ = new Tree(Assign, null, $1, $3, null);}
     | Assert expr
 		{$$ = new Tree (Assert, null, $2, null, null);}
     | Begin state_decls End
@@ -77,12 +94,14 @@ statement : ref Eq expr
     | Exit When expr
 		{$$ = new Tree(Exit, " When", $3, null, null);}
     | If expr Then state_decls end_if
-		{$$ = new Tree(If, null, $2, $4, $5);} 
+		{$$ = new Tree(If, null, $2, $4, $5);}
     ;
 ref : Ident 
 		{$$ = new Tree(Ident, null, null, null, null);}
-    | Ident Dot Ident
-		{$$ = new Tree(Ident, " Dot", new Tree(Ident, null, null, null, null), null, null);} 
+    | Ident Dot Ident		
+		{
+		$$ = new Tree(Dot, null, null, null, null );
+		} 
     ;
 end_if : End If
 		{$$ = new Tree(End, " If", null, null, null);}
@@ -110,8 +129,8 @@ not_expr : Not not_expr
     ;
 rel_expr : sum 
 		{$$ = $1;}
-    | rel_expr Assign sum 
-		{$$ = new Tree(Assign, null, $1, $3, null);}
+    | rel_expr Eq sum 
+		{$$ = new Tree(Eq, null, $1, $3, null);}
     | rel_expr Ne sum
 		{$$ = new Tree(Ne, null, $1, $3, null);}
     | rel_expr Lt sum 
