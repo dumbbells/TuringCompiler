@@ -9,8 +9,11 @@ Yylex.java : proj1.l proj2.y Parser.java
 	-@rm -f Yylex.java
 	$(LEX) proj1.l
 
+Instr.class: Instr.java
+	$(JC) Instr.java
+
 Parser.class : Parser.java
-	javac -Xdiags:verbose Parser.java
+	$(JC) Parser.java
 
 Parser.java : proj2.y
 	$(YACC) proj2.y
