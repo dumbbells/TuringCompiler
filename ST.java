@@ -66,6 +66,7 @@ class ST {
 	}
 
 	public static void printST() {
+/*
 		System.out.println("\t\t\t<------Symbol Table------->");
 		if (STList.isEmpty()) {
 			System.out.println("\tEmpty");
@@ -97,6 +98,7 @@ class ST {
 			}
 		}
 		System.out.println("\t\t\t<------End of Table------->");
+*/
 	}
 
 	public static boolean exists(Object obj) {
