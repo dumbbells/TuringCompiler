@@ -3,11 +3,13 @@ import java.util.*;
 class ST {
 	String name;
 	int scope = -1;
+	int index = -1;
 	short type = -1;
 	List<ST> members = null;
 	String boundTo = null;
 	boolean bound = false;
 	
+	private static int indexCount = 1;
 	public static Stack<ST> STStack = new Stack();
 	public static List<ST> STList = new ArrayList();
 	public static int currentScope = 0;
@@ -16,9 +18,12 @@ class ST {
 		this.name = oldEntry.name;
 		this.scope = oldEntry.scope;
 		this.type = oldEntry.type;
+		this.index = oldEntry.index;
 	}
 
 	public ST(String name, int scope, Tree members) {
+		this.index = indexCount;
+		indexCount++;
 		this.name = name;
 		this.scope = scope;
 		this.type = Parser.Record;
@@ -29,6 +34,8 @@ class ST {
 	}
 
 	public ST(String name, int scope, short type) {
+		this.index = indexCount;
+		indexCount++;
 		this.name = name;
 		this.scope = scope;
 		this.type = type;
@@ -66,39 +73,47 @@ class ST {
 	}
 
 	public static void printST() {
-/*
-		System.out.println("\t\t\t<------Symbol Table------->");
-		if (STList.isEmpty()) {
-			System.out.println("\tEmpty");
-			return;
-		}
-		System.out.println("Current Scope: " + currentScope + "\n");
-		System.out.println("scope\tvisible\tid\tbound\ttype");
-		for (ST entry : STList){
-			System.out.print(entry.scope + "\t" + !entry.bound + "\t"  + entry.name + "\t" 
-			+ (entry.boundTo == null ? "none" : entry.boundTo)
-			+ "\t" + Parser.yyname[entry.type]);
-			if (entry.type == Parser.Record) {
-				System.out.println("\n\t\t<--Fields of " + entry.name + "-->");
-				for (ST member : entry.members){
-					System.out.println(member.scope + "\t" + (!entry.bound)
-					+ "\t"  + member.name + "\t" 
-					+ (member.boundTo == null ? "none" : member.boundTo)
-					+ "\t" + Parser.yyname[member.type]);
-				}
-			System.out.print("\t\t<---End Fields-->");
-			}
-			System.out.println();
-		}
-		if (!STStack.empty()){			
-			System.out.println("\t\t\t<----------Stack----------> ");
-			Object[] temp = STStack.toArray();
-			for (int x = 0; x < temp.length; x++){
-				System.out.println(((ST) temp[x]).scope + "\t" + ((ST)temp[x]).name + "\t" + Parser.yyname[((ST)temp[x]).type]);
-			}
-		}
-		System.out.println("\t\t\t<------End of Table------->");
-*/
+
+		// System.out.println("\t\t\t<------Symbol Table------->");
+		// if (STList.isEmpty()) {
+		// 	System.out.println("\tEmpty");
+		// 	return;
+		// }
+		// System.out.println("Current Scope: " + currentScope + "\n");
+		// System.out.println("scope\tvisible\tid\tbound\tindex\ttype");
+		// for (ST entry : STList){
+		// 	System.out.print(entry.scope + "\t" + !entry.bound + "\t"  + entry.name + "\t" 
+		// 	+ (entry.boundTo == null ? "none" : entry.boundTo)
+		// 	+ "\t" + entry.index + "\t" + Parser.yyname[entry.type]);
+		// 	if (entry.type == Parser.Record) {
+		// 		System.out.println("\n\t\t<--Fields of " + entry.name + "-->");
+		// 		for (ST member : entry.members){
+		// 			System.out.println(member.scope + "\t" + (!entry.bound)
+		// 			+ "\t"  + member.name + "\t" 
+		// 			+ (member.boundTo == null ? "none" : member.boundTo)
+		// 			+ "\t" + Parser.yyname[member.type]);
+		// 		}
+		// 	System.out.print("\t\t<---End Fields-->");
+		// 	}
+		// 	System.out.println();
+		// }
+		// if (!STStack.empty()){			
+		// 	System.out.println("\t\t\t<----------Stack----------> ");
+		// 	Object[] temp = STStack.toArray();
+		// 	for (int x = 0; x < temp.length; x++){
+		// 		System.out.println(((ST) temp[x]).scope + "\t" + ((ST)temp[x]).name + "\t" + Parser.yyname[((ST)temp[x]).type]);
+		// 	}
+		// }
+		// System.out.println("\t\t\t<------End of Table------->");
+
+	}
+	
+	@Override
+	public String toString(){
+		if (this.name == null) return "";
+		return this.scope + "\t" + !this.bound + "\t"  + this.name + "\t" 
+			+ (this.boundTo == null ? "none" : this.boundTo)
+			+ "\t" + this.index + "\t" + Parser.yyname[this.type];
 	}
 
 	public static boolean exists(Object obj) {
@@ -144,7 +159,7 @@ class ST {
 						return entry;
 					}
 				}
-				return null;
+				return new ST(" ", -1, ((Tree) obj).name.shortValue());
 			}
 		}
 		if (obj instanceof String) {

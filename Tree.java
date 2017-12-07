@@ -6,7 +6,8 @@ class Tree{
 	String decor;
 	Tree first, second, third, next;
 	
-	Tree (int nodeName, Object nodeDecor, Object firstSub, Object secondSub, Object thirdSub)
+	Tree (int nodeName, Object nodeDecor, 
+	Object firstSub, Object secondSub, Object thirdSub)
 	{
 		this.name = nodeName; 
 		this.decor = (String) nodeDecor;
